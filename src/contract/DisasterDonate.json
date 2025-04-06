@@ -1,0 +1,543 @@
+
+{ "abi": [
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "disasterId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "organization",
+				"type": "address"
+			}
+		],
+		"name": "addOrganizationToDisaster",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "addToEmergencyReliefFund",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "disasterName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "severity",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "disasterType",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "affectedAreas",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "affectedPeopleCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "targetCollectionAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address[]",
+				"name": "reliefOrganizations",
+				"type": "address[]"
+			}
+		],
+		"name": "createDisaster",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "organization",
+				"type": "address"
+			}
+		],
+		"name": "createOrganization",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "disasterID",
+				"type": "uint256"
+			}
+		],
+		"name": "deleteDisaster",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "disasterId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "organization",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "donorName",
+				"type": "string"
+			}
+		],
+		"name": "donate",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "newUsername",
+				"type": "string"
+			}
+		],
+		"name": "updateUsername",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "withdrawEmergencyFund",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "disasters",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "disasterName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "severity",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "disasterType",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "affectedAreas",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "affectedPeopleCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "targetCollectionAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalCollectedAmount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllDisasterData",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "disasterName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "severity",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "disasterType",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "affectedAreas",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "affectedPeopleCount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "targetCollectionAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalCollectedAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address[]",
+						"name": "reliefOrganizations",
+						"type": "address[]"
+					},
+					{
+						"internalType": "address[]",
+						"name": "topDonors",
+						"type": "address[]"
+					}
+				],
+				"internalType": "struct DisasterDonate.DisasterView[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllOrganizations",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "disasterId",
+				"type": "uint256"
+			}
+		],
+		"name": "getDisaster",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "disasterName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "severity",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "disasterType",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "affectedAreas",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "affectedPeopleCount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "targetCollectionAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "totalCollectedAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address[]",
+						"name": "reliefOrganizations",
+						"type": "address[]"
+					},
+					{
+						"internalType": "address[]",
+						"name": "topDonors",
+						"type": "address[]"
+					}
+				],
+				"internalType": "struct DisasterDonate.DisasterView",
+				"name": "disasterData",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "donor",
+				"type": "address"
+			}
+		],
+		"name": "getDonorName",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getEmergencyReliefFund",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "organization",
+				"type": "address"
+			}
+		],
+		"name": "getOrganization",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalDonations",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "organization",
+				"type": "address"
+			}
+		],
+		"name": "getOrganizationTotalDonations",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "disasterId",
+				"type": "uint256"
+			}
+		],
+		"name": "getTopDonors",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "organizations",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalDonations",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address payable",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "users",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]}
+
