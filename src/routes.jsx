@@ -15,12 +15,15 @@ import NotFound from './pages/NotFound';
 import WithdrawForm from './components/admin/WithdrawForm';
 import WithdrawPage from './pages/WithdrawPage';
 import AddOrganizationToDisaster from './pages/AddOrganizationToDisaster';
+import LandingPage from './pages/LandingPage';
+import RerunViewerPage from './pages/RerunViewerPage';
 
 const AppRoutes = () => {
   return (
     
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/disasters" element={<DisastersPage />} />
         <Route path="/admin/create-disaster" element={<CreateDisasterPage />} />
         <Route path="/admin/manage-organizations" element={<CreateOrganizationPage />} />
@@ -36,6 +39,8 @@ const AppRoutes = () => {
         <Route path="/emergency-fund" element={<EmergencyFundPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/viewer" element={<RerunViewerPage />} />
+        
       </Routes>
    
   );

@@ -305,7 +305,7 @@ const Home = () => {
             
             <div className="bg-white rounded-lg shadow-md p-6 text-center border border-gray-100">
               <div className="text-4xl font-bold text-blue-600 mb-2">
-                {disasters.reduce((total, disaster) => total + disaster.collectedAmount, 0).toFixed(2)} ETH
+                {disasters.reduce((total, disaster) => total + disaster.collectedAmount, 0).toFixed(4)} ETH
               </div>
               <p className="text-gray-600">Total Funds Raised</p>
             </div>

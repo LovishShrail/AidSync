@@ -324,7 +324,7 @@ const fetchTopDonors = async () => {
                       if (contract && contract.getEmergencyReliefFund) {
                         const fund = await contract.getEmergencyReliefFund();
                         document.getElementById('emergencyFund').textContent =
-                          Number(ethers.formatEther(fund)).toFixed(2);
+                          Number(ethers.formatEther(fund)).toFixed(4);
                       }
                     } catch (err) {
                       console.error("Error fetching emergency fund:", err);

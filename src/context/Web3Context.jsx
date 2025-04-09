@@ -63,14 +63,14 @@ export const Web3Provider = ({ children }) => {
 
   const fetchBalance = async (address) => {
     if (!provider || !address) {
-      console.log("Provider or address not available");
+      
       return "0";
     }
     try {
-      console.log("Fetching balance for address:", address);
+      
       const balance = await provider.getBalance(address);
       const formattedBalance = ethers.formatEther(balance);
-      console.log("Balance fetched:", formattedBalance);
+      
       return formattedBalance;
     } catch (err) {
       console.error("Error fetching balance:", err);
@@ -171,7 +171,7 @@ export const Web3Provider = ({ children }) => {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
         if (accounts.length > 0) {
           const balance = await fetchBalance(accounts[0]);
-          console.log("Initial balance fetch:", balance); // Debug log
+         
           
           setProvider(provider);
           setSigner(signer);
@@ -194,7 +194,7 @@ export const Web3Provider = ({ children }) => {
         window.ethereum.on('accountsChanged', async (accounts) => {
           if (accounts.length > 0) {
             const balance = await fetchBalance(accounts[0]);
-            console.log("Accounts changed, new balance:", balance);
+           
             setAccount(accounts[0]);
             setBalance(balance);
             checkOwnerStatus(accounts[0], contract);
@@ -210,7 +210,7 @@ export const Web3Provider = ({ children }) => {
         });
 
       } catch (error) {
-        console.error("Initialization error:", error);
+        ;
         setError(error.message || "Failed to initialize web3");
       } finally {
         setIsLoading(false);

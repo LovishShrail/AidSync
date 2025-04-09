@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rerun-io/web-viewer": "^0.22.1",
+    "@rerun-io/web-viewer-react": "^0.22.1",
     "@tailwindcss/vite": "^4.1.1",
     "ethers": "^6.13.5",
     "lucide-react": "^0.487.0",
@@ -28,6 +30,8 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "vite-plugin-top-level-await": "^1.5.0",
+    "vite-plugin-wasm": "^3.4.1"
   }
 }

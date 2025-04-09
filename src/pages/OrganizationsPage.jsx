@@ -119,7 +119,7 @@ const OrganizationsPage = () => {
                         {org.address}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                        {org.totalDonations.toFixed(2)} ETH
+                        {org.totalDonations.toFixed(3)} ETH
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <Link
