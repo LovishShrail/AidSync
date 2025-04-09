@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { WebViewer } from '@rerun-io/web-viewer';
 
-const RerunViewerPage = () => {
+const RerunViewer = () => {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -90,4 +90,4 @@ const RerunViewerPage = () => {
   );
 };
 
-export default RerunViewerPage;
+export default RerunViewer;

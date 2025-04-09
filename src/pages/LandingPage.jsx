@@ -7,7 +7,7 @@ export default function LandingPage() {
 
   const handleRescueClick = () => {
     console.log("Navigating to rescue section");
-    navigate('/viewer');
+    navigate('/rescue');
   };
 
   const handleReliefClick = () => {

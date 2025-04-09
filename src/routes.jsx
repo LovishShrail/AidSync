@@ -16,7 +16,7 @@ import WithdrawForm from './components/admin/WithdrawForm';
 import WithdrawPage from './pages/WithdrawPage';
 import AddOrganizationToDisaster from './pages/AddOrganizationToDisaster';
 import LandingPage from './pages/LandingPage';
-import RerunViewerPage from './pages/RerunViewerPage';
+import RescuePage from './pages/RescuePage';
 
 const AppRoutes = () => {
   return (
@@ -39,7 +39,7 @@ const AppRoutes = () => {
         <Route path="/emergency-fund" element={<EmergencyFundPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<NotFound />} />
-        <Route path="/viewer" element={<RerunViewerPage />} />
+        <Route path="/rescue" element={<RescuePage />} />
         
       </Routes>
    
