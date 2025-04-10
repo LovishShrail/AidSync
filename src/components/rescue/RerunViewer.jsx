@@ -70,7 +70,7 @@ const RerunViewer = () => {
     //   )}
     // </div>
 
-    <div ref={containerRef} className="w-full h-screen flex items-center justify-center" >
+    <div ref={containerRef} className="w-100% h-screen flex items-center justify-center" >
        {loading && (
         <div style={{
           position: 'absolute',

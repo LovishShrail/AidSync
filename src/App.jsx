@@ -9,10 +9,11 @@ import PageContainer from './components/layout/PageContainer';
 const AppWrapper = () => {
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
+  const isRescuePage = location.pathname === '/rescue';
 
   return (
     <>
-      {isLandingPage ? (
+      {isLandingPage || isRescuePage ? (
         <AppRoutes />
       ) : (
         <PageContainer>
