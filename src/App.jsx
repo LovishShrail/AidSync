@@ -10,10 +10,11 @@ const AppWrapper = () => {
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
   const isRescuePage = location.pathname === '/rescue';
+  const isPredictPage = location.pathname === '/predict';
 
   return (
     <>
-      {isLandingPage || isRescuePage ? (
+      {isLandingPage || isRescuePage || isPredictPage? (
         <AppRoutes />
       ) : (
         <PageContainer>

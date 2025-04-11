@@ -18,6 +18,8 @@ export default defineConfig({
     headers: {
       'Cross-Origin-Embedder-Policy': 'require-corp',
       'Cross-Origin-Opener-Policy': 'same-origin',
+      
+      
     },
     fs: {
       // Allow serving files from one level up to the project root

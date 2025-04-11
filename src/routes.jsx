@@ -17,6 +17,7 @@ import WithdrawPage from './pages/WithdrawPage';
 import AddOrganizationToDisaster from './pages/AddOrganizationToDisaster';
 import LandingPage from './pages/LandingPage';
 import RescuePage from './pages/RescuePage';
+import PredictPage from './pages/PredictPage';
 
 const AppRoutes = () => {
   return (
@@ -40,6 +41,7 @@ const AppRoutes = () => {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<NotFound />} />
         <Route path="/rescue" element={<RescuePage />} />
+        <Route path="/predict" element={<PredictPage/>} />
         
       </Routes>
    
