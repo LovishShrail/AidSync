@@ -82,7 +82,7 @@ export function AuthProvider({ children }) {
           if (name && name !== '') {
             setUsername(name);
           }
-        } catch (error) {
+        } catch {
           // It's okay if this fails - user might not have a username yet
           console.log('User may not have a username yet');
         }

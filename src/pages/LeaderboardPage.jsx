@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { Web3Context } from '../context/Web3Context';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import Alert from '../components/common/Alert';
@@ -14,10 +14,10 @@ const LeaderboardPage = () => {
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('total');
   const [totalDonations, setTotalDonations] = useState(0);
-  const [disasterContributions, setDisasterContributions] = useState({});
+
 
   
-const fetchTopDonors = async () => {
+const fetchTopDonors = useCallback(async () => {
   if (contract) {
     try {
       setIsLoading(true);
@@ -81,8 +81,7 @@ const fetchTopDonors = async () => {
       setTopDonors(processedDonors);
       setTotalDonations(total);
 
-      // Store disaster contributions for each donor
-      setDisasterContributions(disasterCount);
+
     } catch (err) {
       console.error("Error fetching top donors:", err);
       setError("Failed to load leaderboard data");
@@ -90,13 +89,11 @@ const fetchTopDonors = async () => {
       setIsLoading(false);
     }
   }
-};
-
+}, [contract]);
 
   useEffect(() => {
-   
     fetchTopDonors();
-  }, [contract]);
+  }, [fetchTopDonors]);
 
   const handleSortChange = (e) => {
     setSortBy(e.target.value);

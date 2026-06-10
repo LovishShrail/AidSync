@@ -6,7 +6,7 @@ import { LoadingSpinner } from '../common/LoadingSpinner';
 import { Modal } from '../common/Modal';
 
 const DonationForm = ({ disasterId, organizations, onSuccess }) => {
-  const { contract, account } = useContext(Web3Context);
+  const { contract } = useContext(Web3Context);
   const [amount, setAmount] = useState('');
   const [donorName, setDonorName] = useState('');
   const [selectedOrg, setSelectedOrg] = useState('');

@@ -1,18 +1,12 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import { ChevronLeft, ChevronRight, Play, Film, BrainCircuit } from 'lucide-react';
 import { Button } from '../ui/button';
 
 const CarouselSection = ({ title, description, frames, type }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [currentInterpolatedFrame, setCurrentInterpolatedFrame] = useState(0);
-  const [isVisible, setIsVisible] = useState({
-    howItWorks: false,
-    interpolation: false,
-    prediction: false,
-    advantages: false
-  });
+
   const [videoElement, setVideoElement] = useState(null);
 
   const setupVideo = (element) => {
@@ -72,42 +66,7 @@ const CarouselSection = ({ title, description, frames, type }) => {
     verifyVideo();
   }, [type]);
 
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.2
-    };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setIsVisible(prev => ({
-            ...prev,
-            [entry.target.id]: true
-          }));
-        }
-      });
-    }, observerOptions);
-
-    const sections = ['howItWorks', 'interpolation', 'prediction', 'advantages'];
-    sections.forEach(section => {
-      const element = document.getElementById(section);
-      if (element) observer.observe(element);
-    });
-
-    return () => {
-      sections.forEach(section => {
-        const element = document.getElementById(section);
-        if (element) observer.unobserve(element);
-      });
-    };
-  }, []);
-
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) =>

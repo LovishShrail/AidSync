@@ -12,7 +12,6 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import EmergencyFundPage from './pages/EmergencyFundPage';
 import AdminPage from './pages/AdminPage';
 import NotFound from './pages/NotFound';
-import WithdrawForm from './components/admin/WithdrawForm';
 import WithdrawPage from './pages/WithdrawPage';
 import AddOrganizationToDisaster from './pages/AddOrganizationToDisaster';
 import LandingPage from './pages/LandingPage';
@@ -29,9 +28,8 @@ const AppRoutes = () => {
         <Route path="/admin/create-disaster" element={<CreateDisasterPage />} />
         <Route path="/admin/manage-organizations" element={<CreateOrganizationPage />} />
         <Route path="/admin/withdraw" element={<WithdrawPage />} />
-        <Route path="/admin/wihtdraw" element={<WithdrawForm />} />
         <Route path="/disasters/:id" element={<DisasterDetailPage />} />
-        <Route path="//disasters/:id/add-organization" element={<AddOrganizationToDisaster />} />     
+        <Route path="/disasters/:id/add-organization" element={<AddOrganizationToDisaster />} />     
         <Route path="/organizations" element={<OrganizationsPage />} />
         <Route path="/organizations/create" element={<CreateOrganizationPage />} />
         <Route path="/organizations/:address" element={<OrganizationDetailPage />} />

@@ -46,7 +46,7 @@ const Navbar = () => {
               Organizations
             </Link>
             <Link to="/leaderboard" className={`font-medium ${isActive('/leaderboard')}`}>
-              Leaderboard
+              Top Donors
             </Link>
             <Link to="/emergency-fund" className={`font-medium ${isActive('/emergency-fund')}`}>
               Emergency Fund

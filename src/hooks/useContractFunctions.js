@@ -1,5 +1,4 @@
-// src/hooks/useContractFunctions.js
-import { useState, useEffect,useContext } from 'react';
+import { useState, useContext, useCallback } from 'react';
 import { Web3Context } from '../context/Web3Context';
 import { formatEther } from '../utils/formatters';
 
@@ -12,7 +11,7 @@ export const useContractFunctions = () => {
   const [error, setError] = useState(null);
 
   // Get all disasters with user's donations
-  const fetchUserDonations = async () => {
+  const fetchUserDonations = useCallback(async () => {
     if (!contract || !account) return;
 
     setIsLoading(true);
@@ -63,10 +62,10 @@ export const useContractFunctions = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [contract, account]);
 
   // Update username
-  const updateUsername = async (username) => {
+  const updateUsername = useCallback(async (username) => {
     if (!contract || !account) return;
 
     setIsLoading(true);
@@ -84,7 +83,7 @@ export const useContractFunctions = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [contract, account]);
 
   return {
     userDonations,

@@ -22,11 +22,9 @@ const WithdrawForm = () => {
         
         setLoading(true);
         
-        // Get contract ETH balance using provider
         const contractAddress = await contract.getAddress();
         const contractBalance = await provider.getBalance(contractAddress);
         
-        // Get emergency fund balance from contract
         const emergencyFund = await contract.getEmergencyReliefFund();
         
         setBalance(formatEther(contractBalance));

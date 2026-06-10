@@ -11,7 +11,7 @@ import { ethers } from 'ethers';
 
 const DisasterDetailPage = () => {
   const { id } = useParams();
-  const { contract, account } = useContext(Web3Context);
+  const { contract } = useContext(Web3Context);
   const [disaster, setDisaster] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);

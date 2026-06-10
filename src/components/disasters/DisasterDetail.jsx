@@ -10,19 +10,19 @@ import DonationForm from '../donations/DonationForm';
 import RecentDonations from '../donations/RecentDonations';
 import LeaderboardTable from '../donations/LeaderboardTable';
 import { formatEther } from '../../utils/formatters';
-import { ethers } from 'ethers';
+
 
 const DisasterDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { contract } = useContract();
-  const { connected, address } = useWallet();
+  const { connected } = useWallet();
   
   const [disaster, setDisaster] = useState(null);
   const [loading, setLoading] = useState(true);
   const [organizations, setOrganizations] = useState([]);
   const [showDonationModal, setShowDonationModal] = useState(false);
-  const [topDonors, setTopDonors] = useState({ addresses: [], amounts: [] });
+
   
   useEffect(() => {
     const fetchDisasterDetails = async () => {
@@ -40,9 +40,7 @@ const DisasterDetail = () => {
         const orgsWithNames = await Promise.all(orgPromises);
         setOrganizations(orgsWithNames);
         
-        // Fetch top donors
-        const [addresses, amounts] = await contract.getTopDonors(id);
-        setTopDonors({ addresses, amounts });
+
         
         setLoading(false);
       } catch (error) {

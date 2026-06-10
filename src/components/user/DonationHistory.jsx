@@ -14,7 +14,7 @@ const DonationHistory = () => {
 
   React.useEffect(() => {
     fetchUserDonations();
-  }, []);
+  }, [fetchUserDonations]);
 
   const formatDate = (timestamp) => {
     return new Date(timestamp).toLocaleDateString();

@@ -262,11 +262,11 @@ const RescuePage = () => {
 
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-16">
                             {[
-                                '../public/rescueImage/00003.png',
-                                '../public/rescueImage/00005.png',
-                                '../public/rescueImage/00007.png',
-                                '../public/rescueImage/00011.png',
-                                '../public/rescueImage/00013.png',
+                                '/rescueImage/00003.png',
+                                '/rescueImage/00005.png',
+                                '/rescueImage/00007.png',
+                                '/rescueImage/00011.png',
+                                '/rescueImage/00013.png',
                                 
                             ].map((src, index) => (
                                 <div

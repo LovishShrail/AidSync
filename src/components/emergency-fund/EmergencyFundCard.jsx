@@ -1,6 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Web3Context } from '../../context/Web3Context';
-import { ethers } from 'ethers';
+import React from 'react';
 
 const EmergencyFundCard = ({ balance }) => {
   // Use balance passed from parent component (EmergencyFundPage)

@@ -8,7 +8,7 @@ import { ethers } from 'ethers';
 
 
 const EmergencyFundPage = () => {
-  const { contract, account, isAdmin } = useContext(Web3Context);
+  const { contract, isAdmin } = useContext(Web3Context);
   const [fundBalance, setFundBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);

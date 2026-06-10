@@ -19,7 +19,7 @@ export function useContract() {
     setError(null);
     
     try {
-      const options = value ? { value: ethers.utils.parseEther(value.toString()) } : {};
+      const options = value ? { value: ethers.parseEther(value.toString()) } : {};
       const tx = await contract[method](...args, options);
       
       notification.info(`Transaction submitted: ${tx.hash.substring(0, 10)}...`);
@@ -95,7 +95,7 @@ export function useContract() {
       setIsLoading(false);
       return {
         donors: result[0],
-        amounts: result[1].map(amount => ethers.utils.formatEther(amount))
+        amounts: result[1].map(amount => ethers.formatEther(amount))
       };
     } catch (err) {
       console.error('Error getting top donors:', err);
@@ -110,7 +110,7 @@ export function useContract() {
     
     try {
       const fund = await contract.getEmergencyReliefFund();
-      return ethers.utils.formatEther(fund);
+      return ethers.formatEther(fund);
     } catch (err) {
       console.error('Error getting emergency fund:', err);
       return '0';
@@ -136,7 +136,7 @@ export function useContract() {
       description,
       affectedAreas,
       affectedPeopleCount,
-      ethers.utils.parseEther(targetCollectionAmount.toString()),
+      ethers.parseEther(targetCollectionAmount.toString()),
       reliefOrganizations
     ]);
   };

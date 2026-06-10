@@ -1,5 +1,4 @@
-// src/components/user/UserProfile.js
-import React, { useState, useContext,useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { Web3Context } from '../../context/Web3Context';
 import { useContractFunctions } from '../../hooks/useContractFunctions';
 import DonationHistory from './DonationHistory';
@@ -9,7 +8,7 @@ import { formatAddress } from '../../utils/formatters';
 import { User, Award, History, Settings } from 'lucide-react';
 
 const UserProfile = () => {
-  const { account, connectWallet, balance, contract, isLoading: isWeb3Loading } = useContext(Web3Context);
+  const { account, connectWallet, balance, contract } = useContext(Web3Context);
   // console.log('Web3Context values:', {
   //   account,
   //   balance,
@@ -26,29 +25,25 @@ const UserProfile = () => {
   } = useContractFunctions();
   const [activeTab, setActiveTab] = useState('overview');
   const [username, setUsername] = useState('');
-  const [isFetchingUsername, setIsFetchingUsername] = useState(false);
 
-  const fetchUsername = async () => {
+  const fetchUsername = useCallback(async () => {
     if (contract && account) {
       try {
-        setIsFetchingUsername(true);
         const name = await contract.getDonorName(account);
         setUsername(name || 'Anonymous Donor');
       } catch (err) {
         console.error("Error fetching username:", err);
         setUsername('Anonymous Donor');
-      } finally {
-        setIsFetchingUsername(false);
       }
     }
-  };
+  }, [contract, account]);
 
   useEffect(() => {
     if (account) {
       fetchUserDonations();
       fetchUsername();
     }
-  }, [account, contract]);
+  }, [account, fetchUserDonations, fetchUsername]);
 
   const handleUsernameUpdate = async (newUsername) => {
     const success = await updateUsername(newUsername);

@@ -37,7 +37,7 @@ export function useWallet() {
 
     try {
       const balance = await provider.getBalance(account);
-      return ethers.utils.formatEther(balance);
+      return ethers.formatEther(balance);
     } catch (err) {
       console.error('Error getting ETH balance:', err);
       return null;

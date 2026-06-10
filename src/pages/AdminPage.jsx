@@ -6,10 +6,8 @@ import WithdrawForm from '../components/admin/WithdrawForm';
 import AdminControls from '../components/admin/AdminControls';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import Alert from '../components/common/Alert';
-import { ethers } from 'ethers';
-
 const AdminPage = () => {
-  const { account,isLoading  } = useWeb3();
+  const { account } = useWeb3();
   const { isAdmin } = useAuth(); // Now using AuthContext
   const [activeTab, setActiveTab] = useState('dashboard');
   const [error, setError] = useState(null);

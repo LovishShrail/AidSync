@@ -1,5 +1,5 @@
 // src/pages/ProfilePage.js
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { Web3Context } from '../context/Web3Context';
 import UserProfile from '../components/user/UserProfile';
 import LoadingSpinner from '../components/common/LoadingSpinner';

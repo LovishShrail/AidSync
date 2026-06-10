@@ -9,10 +9,11 @@ const LeaderboardTable = ({ donors = [], amounts = [], title = "Top Donors" }) =
   const [isLoading, setIsLoading] = useState(true)
   // Ensure donors and amounts are arrays and have the same length
 
-  const validDonors = Array.isArray(donors) ? donors : [];
-  const validAmounts = Array.isArray(amounts) ? amounts : [];
   useEffect(() => {
     const fetchDonorNames = async () => {
+      const validDonors = Array.isArray(donors) ? donors : [];
+      const validAmounts = Array.isArray(amounts) ? amounts : [];
+
       if (!contract || validDonors.length === 0 || validAmounts.length === 0) {
         setIsLoading(false);
         return;
@@ -50,7 +51,7 @@ const LeaderboardTable = ({ donors = [], amounts = [], title = "Top Donors" }) =
     };
 
     fetchDonorNames();
-  }, [contract, validDonors, validAmounts]);
+  }, [contract, donors, amounts]);
 
 
   return (

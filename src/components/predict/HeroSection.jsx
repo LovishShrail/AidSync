@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../ui/button";
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import { ChevronDown, Zap, Shield } from 'lucide-react';
 
 const HeroSection = () => {

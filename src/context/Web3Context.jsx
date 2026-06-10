@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 import DisasterDonateContract from '../contract/DisasterDonate.json';
 
@@ -40,7 +40,7 @@ export const Web3Provider = ({ children }) => {
             }]
           });
           return true;
-        } catch (addError) {
+        } catch {
           setError("Failed to add Sepolia network");
           return false;
         }
@@ -50,7 +50,7 @@ export const Web3Provider = ({ children }) => {
     }
   };
 
-  const checkOwnerStatus = async (address, contract) => {
+  const checkOwnerStatus = useCallback(async (address, contract) => {
     if (address && contract) {
       try {
         const ownerAddress = await contract.owner();
@@ -59,9 +59,9 @@ export const Web3Provider = ({ children }) => {
         console.error("Error checking owner status:", err);
       }
     }
-  };
+  }, []);
 
-  const fetchBalance = async (address) => {
+  const fetchBalance = useCallback(async (address) => {
     if (!provider || !address) {
       
       return "0";
@@ -76,7 +76,7 @@ export const Web3Provider = ({ children }) => {
       console.error("Error fetching balance:", err);
       return "0";
     }
-  };
+  }, [provider]);
 
 
   const connectWallet = async () => {
@@ -225,7 +225,7 @@ export const Web3Provider = ({ children }) => {
         window.ethereum.removeAllListeners('chainChanged');
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const updateBalance = async () => {
@@ -236,7 +236,7 @@ export const Web3Provider = ({ children }) => {
     };
     
     updateBalance();
-  }, [account, provider]);
+  }, [account, provider, fetchBalance]);
 
   return (
     <Web3Context.Provider

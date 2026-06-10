@@ -1,6 +1,6 @@
 // src/components/user/ProfileSettings.js
 import React, { useState, useContext } from 'react';
-import { useContractFunctions } from '../../hooks/useContractFunctions';
+
 import Alert from '../common/Alert';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { Web3Context } from '../../context/Web3Context';
@@ -9,7 +9,6 @@ import { Web3Context } from '../../context/Web3Context';
 const ProfileSettings = ({ username: initialUsername, onUpdate  }) => {
 
   const {  account } = useContext(Web3Context);
-  const { updateUsername } = useContractFunctions();
   const [username, setUsername] = useState(initialUsername || '');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

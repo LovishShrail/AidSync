@@ -50,12 +50,13 @@ const DisasterList = () => {
           const progressB = Number(b.totalCollectedAmount) / Number(b.targetCollectionAmount);
           return progressB - progressA;
         });
-      case 'severity':
+      case 'severity': {
         // Sorting by severity (Critical > High > Medium > Low)
         const severityValues = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
         return sortedDisasters.sort((a, b) => 
           severityValues[b.severity] - severityValues[a.severity]
         );
+      }
       case 'newest':
       default:
         // By default, we'll assume newest on top

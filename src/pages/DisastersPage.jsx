@@ -7,7 +7,7 @@ import Alert from '../components/common/Alert';
 import { ethers } from 'ethers';
 
 const DisastersPage = () => {
-  const { contract, account, isAdmin } = useContext(Web3Context);
+  const { contract } = useContext(Web3Context);
   const [disasters, setDisasters] = useState([]);
   const [filteredDisasters, setFilteredDisasters] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,13 +75,13 @@ const DisastersPage = () => {
     setFilteredDisasters(result);
   }, [filters, disasters]);
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  // const handleFilterChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFilters(prev => ({
+  //     ...prev,
+  //     [name]: value
+  //   }));
+  // };
 
   if (isLoading) {
     return (

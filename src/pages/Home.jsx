@@ -23,7 +23,7 @@ const Home = () => {
   const [featuredDisasters, setFeaturedDisasters] = useState([]);
   const [emergencyFund, setEmergencyFund] = useState(0);
   const [isLoadingData, setIsLoadingData] = useState(true);
-  const [fetchError, setFetchError] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +34,7 @@ const Home = () => {
 
       try {
         setIsLoadingData(true);
-        setFetchError(null);
+
         
         // Verify contract is connected
         if (!contract.runner) {
@@ -84,7 +84,7 @@ const Home = () => {
         setFeaturedDisasters(featured);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setFetchError(err.message || "Failed to fetch data from contract");
+        // Error is logged to console
       } finally {
         setIsLoadingData(false);
       }

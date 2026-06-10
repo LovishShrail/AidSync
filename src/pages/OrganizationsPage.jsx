@@ -6,7 +6,7 @@ import Alert from '../components/common/Alert';
 import { ethers } from 'ethers';
 
 const OrganizationsPage = () => {
-  const { contract, account, isAdmin } = useContext(Web3Context);
+  const { contract, isAdmin } = useContext(Web3Context);
   const [organizations, setOrganizations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
