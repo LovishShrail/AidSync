@@ -11,6 +11,10 @@ export default function LandingPage() {
   // Continuous rotation angle for 3D spin
   const [rotationTime, setRotationTime] = useState(0);
 
+  // Mouse positions for interactive parallax depth of the cube
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [dampenedMouse, setDampenedMouse] = useState({ x: 0, y: 0 });
+
   // Dynamic layout coordinates for placeholder tracking
   const [positions, setPositions] = useState({
     hero: { x: typeof window !== 'undefined' ? window.innerWidth / 2 : 600, y: 320 },
@@ -24,7 +28,9 @@ export default function LandingPage() {
     link.rel = 'stylesheet';
     document.head.appendChild(link);
     return () => {
-      document.head.removeChild(link);
+      if (document.head.contains(link)) {
+        document.head.removeChild(link);
+      }
     };
   }, []);
 
@@ -51,7 +57,6 @@ export default function LandingPage() {
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     const updateScroll = () => {
-      // 0.1 interpolation factor gives a smooth spring ease-out trailing effect
       currentScroll += (targetScroll - currentScroll) * 0.1;
       setDampenedScroll(currentScroll);
       animationFrameId = requestAnimationFrame(updateScroll);
@@ -63,6 +68,34 @@ export default function LandingPage() {
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
+
+  // Mouse move listener to track client offset
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = (e.clientY / window.innerHeight) * 2 - 1;
+      setMousePos({ x, y });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Dampen mouse movement for smooth parallax ease
+  useEffect(() => {
+    let animationFrameId;
+    let currX = 0;
+    let currY = 0;
+
+    const updateMouse = () => {
+      currX += (mousePos.x - currX) * 0.08;
+      currY += (mousePos.y - currY) * 0.08;
+      setDampenedMouse({ x: currX, y: currY });
+      animationFrameId = requestAnimationFrame(updateMouse);
+    };
+    updateMouse();
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [mousePos]);
 
   // Measure placeholder center positions in absolute document coordinates
   useLayoutEffect(() => {
@@ -87,7 +120,6 @@ export default function LandingPage() {
       }
     };
 
-    // Delay slightly to ensure browser layout completes
     const timer = setTimeout(measurePositions, 100);
     window.addEventListener('resize', measurePositions);
     return () => {
@@ -126,9 +158,13 @@ export default function LandingPage() {
     const pulse = t === 1 ? Math.sin(rotationTime * 0.05) * 0.015 : 0;
     scale = baseScale + pulse;
 
+    // Add mouse parallax drift to positions when not fully locked
+    const mouseXOffset = dampenedMouse.x * 25 * (1 - ease);
+    const mouseYOffset = dampenedMouse.y * 25 * (1 - ease);
+
     // Viewport-relative fixed positioning (syncs with dampened scroll)
-    const clientX = pageX - (typeof window !== 'undefined' ? window.scrollX : 0);
-    const clientY = pageY - dampenedScroll;
+    const clientX = pageX - (typeof window !== 'undefined' ? window.scrollX : 0) + mouseXOffset;
+    const clientY = pageY - dampenedScroll + mouseYOffset;
 
     // Combine spin and scroll rotations
     const rotX = rotationTime * 0.3 + dampenedScroll * 0.15;
@@ -136,24 +172,23 @@ export default function LandingPage() {
     const rotZ = dampenedScroll * 0.05;
 
     // Emissive styling factors mapping merge arrival status
-    const borderAlpha = 0.35 + ease * 0.25; // Border opacity highlights on arrival
+    const borderAlpha = 0.35 + ease * 0.3; // Border opacity highlights on arrival
     const insetGlow = 15 + ease * 15;
-    const outerGlow = ease * 30;
-    const auraOpacity = ease * 0.35;
+    const outerGlow = ease * 40;
+    const auraOpacity = ease * 0.5;
 
     return {
       style: {
         left: `${clientX}px`,
         top: `${clientY}px`,
-        transform: 'translate(-50%, -50%)',
+        transform: `translate(-50%, -50%) scale(${scale})`, // Scale applied here to prevent 3D warping
         zIndex: 40
       },
-      cubeTransform: `rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg) scale(${scale})`,
+      cubeTransform: `rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`,
       faceStyle: {
-        borderColor: `rgba(255, 255, 255, ${borderAlpha})`, // Elegant white highlight border
-        // Premium solid blue gradient representing the brand color
-        background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', 
-        boxShadow: `inset 0 0 ${insetGlow}px rgba(255, 255, 255, 0.3), 0 0 ${outerGlow}px rgba(37, 99, 235, ${0.1 + auraOpacity})`
+        borderColor: `rgba(147, 197, 253, ${borderAlpha})`, // Cyan border
+        background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.98))', 
+        boxShadow: `inset 0 0 ${insetGlow}px rgba(255, 255, 255, 0.35), 0 0 ${outerGlow}px rgba(37, 99, 235, ${0.15 + auraOpacity})`
       },
       mergeProgress: t
     };
@@ -183,10 +218,37 @@ export default function LandingPage() {
           height: 140px;
           border-width: 1.5px;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
           border-radius: 12px;
           transition: border-color 0.2s ease, box-shadow 0.2s ease;
+          overflow: hidden;
+        }
+
+        /* Diagonal gloss line sweep for 3D crystal reflection */
+        .cube-face::after {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: linear-gradient(
+            45deg,
+            transparent 45%,
+            rgba(255, 255, 255, 0.1) 48%,
+            rgba(255, 255, 255, 0.22) 50%,
+            rgba(255, 255, 255, 0.1) 52%,
+            transparent 55%
+          );
+          transform: rotate(-15deg);
+          animation: glossSweep 7s infinite linear;
+          pointer-events: none;
+        }
+        @keyframes glossSweep {
+          0% { transform: translate(-30%, -30%) rotate(-15deg); }
+          100% { transform: translate(30%, 30%) rotate(-15deg); }
         }
         
         /* 3D Dice Face Positions */
@@ -224,6 +286,47 @@ export default function LandingPage() {
           100% { transform: rotateX(360deg) rotateY(360deg); }
         }
 
+        /* Glassmorphic Static Feature Orbs */
+        .feature-orb {
+          position: absolute;
+          transform: translate(-50%, -50%);
+          border-radius: 9999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(59, 130, 246, 0.35);
+          background: rgba(15, 23, 42, 0.88); /* dark slate background for high premium contrast */
+          box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.7), 
+                      inset 3px 3px 8px rgba(255, 255, 255, 0.15), 
+                      0 10px 20px rgba(0, 0, 0, 0.15), 
+                      0 0 15px rgba(59, 130, 246, 0.25);
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-orb:hover {
+          transform: translate(-50%, -50%) scale(1.08);
+          border-color: rgba(6, 182, 212, 0.6);
+          box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.7), 
+                      inset 3px 3px 8px rgba(255, 255, 255, 0.25), 
+                      0 12px 24px rgba(0, 0, 0, 0.2), 
+                      0 0 25px rgba(6, 182, 212, 0.45);
+        }
+
+        /* Concentric Node Ripples */
+        @keyframes ripple {
+          0% {
+            transform: scale(0.75);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(2.4);
+            opacity: 0;
+          }
+        }
+        .ripple-effect {
+          transform-origin: center;
+          animation: ripple 2.8s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+
         /* Animated SVG constellation connectors */
         @keyframes dash {
           to {
@@ -256,34 +359,65 @@ export default function LandingPage() {
         className="fixed pointer-events-none"
         style={activeCube.style}
       >
-        <div className="scene w-[200px] h-[200px] flex items-center justify-center">
+        <div className="scene w-[200px] h-[200px] flex items-center justify-center relative">
+          
+          {/* Glowing Aura Behind Cube */}
+          <div 
+            className="absolute rounded-full filter blur-3xl transition-opacity duration-300 pointer-events-none"
+            style={{
+              width: '180px',
+              height: '180px',
+              background: 'radial-gradient(circle, rgba(59, 130, 246, 0.45) 0%, rgba(6, 182, 212, 0.25) 50%, transparent 100%)',
+              opacity: activeCube.mergeProgress,
+              transform: 'translateZ(-60px)'
+            }}
+          />
+
           <div 
             className="cube" 
             style={{ transform: activeCube.cubeTransform }}
           >
             {/* Front: Smart Escrow */}
             <div className="cube-face face-front" style={activeCube.faceStyle}>
-              <Shield className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <Shield className="w-6 h-6 text-cyan-200 mb-1.5" strokeWidth={1.5} />
+              <span className="text-[10px] tracking-[0.25em] font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)] uppercase">
+                AidSync 3D
+              </span>
             </div>
             {/* Back: Verified Evidence */}
             <div className="cube-face face-back" style={activeCube.faceStyle}>
-              <Eye className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <Eye className="w-6 h-6 text-cyan-200 mb-1.5" strokeWidth={1.5} />
+              <span className="text-[10px] tracking-[0.25em] font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)] uppercase">
+                AidSync 3D
+              </span>
             </div>
             {/* Right: Event Synchronization */}
             <div className="cube-face face-right" style={activeCube.faceStyle}>
-              <Zap className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <Zap className="w-6 h-6 text-cyan-200 mb-1.5" strokeWidth={1.5} />
+              <span className="text-[10px] tracking-[0.25em] font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)] uppercase">
+                AidSync 3D
+              </span>
             </div>
             {/* Left: Global Blockchain */}
             <div className="cube-face face-left" style={activeCube.faceStyle}>
-              <Globe className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <Globe className="w-6 h-6 text-cyan-200 mb-1.5" strokeWidth={1.5} />
+              <span className="text-[10px] tracking-[0.25em] font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)] uppercase">
+                AidSync 3D
+              </span>
             </div>
             {/* Top: Secure escrow funds */}
             <div className="cube-face face-top" style={activeCube.faceStyle}>
-              <Coins className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <Layers className="w-6 h-6 text-cyan-200 mb-1.5" strokeWidth={1.5} />
+              <span className="text-[10px] tracking-[0.25em] font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)] uppercase">
+                AidSync 3D
+              </span>
             </div>
             {/* Bottom: Aid & Relief */}
             <div className="cube-face face-bottom" style={activeCube.faceStyle}>
-              <Heart className="w-10 h-10 text-white" strokeWidth={1.5} />
+              <Activity className="w-6 h-6 text-cyan-200 mb-1.5" strokeWidth={1.5} />
+              <span className="text-[10px] tracking-[0.25em] font-semibold text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.7)] uppercase">
+                AidSync 3D
+              </span>
             </div>
           </div>
         </div>
@@ -302,7 +436,7 @@ export default function LandingPage() {
           />
         </div>
         
-        {/* Navigation Links matching project specifications */}
+        {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-10">
           <span onClick={enterApp} className="cursor-pointer text-[10px] font-semibold tracking-[0.22em] text-slate-500 hover:text-blue-600 transition-colors uppercase">
             Dashboard
@@ -336,11 +470,8 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="flex-grow flex flex-col items-center justify-center text-center px-6 pt-16 pb-32 z-10 max-w-[1280px] mx-auto w-full relative">
         
-        {/* Invisible Hero Position Placeholder */}
-        <div 
-          id="placeholder-hero" 
-          className="w-[140px] h-[140px] mb-10 mt-4 pointer-events-none opacity-0"
-        />
+        {/* Hero Position Placeholder */}
+        <div id="placeholder-hero" className="w-[140px] h-[140px] mb-10 mt-4 pointer-events-none opacity-0" />
 
         {/* Feature Tag Pill */}
         <div className="inline-flex items-center space-x-2.5 px-3 py-1 mb-8 rounded-[4px] border border-blue-500/20 bg-blue-50 text-blue-600 animate-fade-in-up">
@@ -350,12 +481,58 @@ export default function LandingPage() {
           </span>
         </div>
 
-        {/* Monolithic Display Headline */}
-        <h1 className="text-4xl md:text-[80px] font-normal leading-[0.90] tracking-[-0.035em] text-slate-900 uppercase max-w-5xl mx-auto my-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          Transparent Aid. <br />
-          On-Chain Escrow. <br />
-          Real-Time Sync.
-        </h1>
+        {/* Headline Container with Static Feature Spheres Arranged Around the Text */}
+        <div className="relative w-full max-w-5xl mx-auto my-6 px-4">
+          
+          {/* Orb 1: Top-Left (Lock) */}
+          <div className="hidden md:flex feature-orb" style={{ left: '16%', top: '-25%', width: '56px', height: '56px', zIndex: 10 }}>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+            <div className="absolute top-[12%] left-[12%] w-[20%] h-[20%] rounded-full bg-white/30 filter blur-[0.3px] pointer-events-none" />
+            <Lock className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" strokeWidth={1.5} />
+          </div>
+
+          {/* Orb 2: Top-Right (Eye) */}
+          <div className="hidden md:flex feature-orb" style={{ left: '84%', top: '-18%', width: '64px', height: '64px', zIndex: 10 }}>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+            <div className="absolute top-[12%] left-[12%] w-[20%] h-[20%] rounded-full bg-white/30 filter blur-[0.3px] pointer-events-none" />
+            <Eye className="w-6 h-6 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" strokeWidth={1.5} />
+          </div>
+
+          {/* Orb 3: Mid-Left (Shield) */}
+          <div className="hidden md:flex feature-orb" style={{ left: '-2%', top: '35%', width: '60px', height: '60px', zIndex: 10 }}>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+            <div className="absolute top-[12%] left-[12%] w-[20%] h-[20%] rounded-full bg-white/30 filter blur-[0.3px] pointer-events-none" />
+            <Shield className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" strokeWidth={1.5} />
+          </div>
+
+          {/* Orb 4: Mid-Right (Activity) */}
+          <div className="hidden md:flex feature-orb" style={{ left: '102%', top: '55%', width: '58px', height: '58px', zIndex: 10 }}>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+            <div className="absolute top-[12%] left-[12%] w-[20%] h-[20%] rounded-full bg-white/30 filter blur-[0.3px] pointer-events-none" />
+            <Activity className="w-5 h-5 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" strokeWidth={1.5} />
+          </div>
+
+          {/* Orb 5: Bottom-Left (Zap) */}
+          <div className="hidden md:flex feature-orb" style={{ left: '10%', top: '110%', width: '52px', height: '52px', zIndex: 10 }}>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+            <div className="absolute top-[12%] left-[12%] w-[20%] h-[20%] rounded-full bg-white/30 filter blur-[0.3px] pointer-events-none" />
+            <Zap className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]" strokeWidth={1.5} />
+          </div>
+
+          {/* Orb 6: Bottom-Right (Heart) */}
+          <div className="hidden md:flex feature-orb" style={{ left: '90%', top: '105%', width: '62px', height: '62px', zIndex: 10 }}>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+            <div className="absolute top-[12%] left-[12%] w-[20%] h-[20%] rounded-full bg-white/30 filter blur-[0.3px] pointer-events-none" />
+            <Heart className="w-6 h-6 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" strokeWidth={1.5} />
+          </div>
+
+          {/* Monolithic Display Headline */}
+          <h1 className="text-4xl md:text-[80px] font-normal leading-[0.90] tracking-[-0.035em] text-slate-900 uppercase max-w-5xl mx-auto relative z-0 pointer-events-none animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Transparent Aid. <br />
+            On-Chain Escrow. <br />
+            Real-Time Sync.
+          </h1>
+        </div>
 
         {/* Humanist Body Text */}
         <p className="text-slate-500 text-base md:text-[16px] leading-[1.50] max-w-[560px] mx-auto mt-6 mb-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -399,7 +576,7 @@ export default function LandingPage() {
       <section className="max-w-[1280px] w-full mx-auto px-6 py-24 z-10 relative">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           
-          {/* Left Description Column (40% equivalent) */}
+          {/* Left Description Column */}
           <div className="lg:col-span-5 space-y-8">
             <span className="text-[10px] font-semibold tracking-[0.25em] text-blue-600 uppercase">System Topology</span>
             <h2 className="text-3xl md:text-[48px] font-normal leading-[1.0] text-slate-900 tracking-[-0.03em] uppercase">
@@ -414,20 +591,29 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Right Constellation Visual (60% equivalent) */}
+          {/* Right Constellation Visual */}
           <div className="lg:col-span-7 flex justify-center relative select-none">
             
             {/* SVG Constellation with empty center for 3D Cube alignment */}
-            <svg viewBox="0 0 500 500" className="w-full max-w-[480px] h-auto">
+            <svg viewBox="0 0 500 500" className="w-full max-w-[480px] h-auto overflow-visible">
               
-              {/* Pulsing Central Target Rings: Glows and pulses actively once the cube arrives */}
+              {/* Concentric ripples animating on arrival */}
+              {activeCube.mergeProgress === 1 && (
+                <>
+                  <circle cx="250" cy="250" r="32" fill="none" stroke="#3b82f6" strokeWidth="1.5" className="ripple-effect" style={{ animationDelay: '0s' }} />
+                  <circle cx="250" cy="250" r="32" fill="none" stroke="#67e8f9" strokeWidth="1" className="ripple-effect" style={{ animationDelay: '0.9s' }} />
+                  <circle cx="250" cy="250" r="32" fill="none" stroke="#2563eb" strokeWidth="0.5" className="ripple-effect" style={{ animationDelay: '1.8s' }} />
+                </>
+              )}
+
+              {/* Pulsing Central Target Rings */}
               <circle 
                 cx="250" 
                 cy="250" 
                 r="35" 
                 fill="none" 
                 stroke={activeCube.mergeProgress === 1 ? "#2563eb" : "rgba(37, 99, 235, 0.3)"} 
-                strokeWidth={activeCube.mergeProgress === 1 ? "2" : "1"} 
+                strokeWidth={activeCube.mergeProgress === 1 ? "2.5" : "1"} 
                 className={activeCube.mergeProgress === 1 ? "animate-pulse" : ""} 
                 style={{ transition: 'stroke 0.4s ease, stroke-width 0.4s ease' }}
               />
@@ -496,10 +682,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Reversal Band: Dark Section breaking the light rhythm */}
+      {/* Reversal Band: Dark Section */}
       <section className="bg-[#0f172a] text-[#f9f9f9] py-24 w-full relative z-10 select-none overflow-hidden border-t border-b border-[#1e293b]">
         
-        {/* Floating Mini 3D Cubes overlapping at left/right edges for visual balance */}
+        {/* Floating Mini 3D Cubes */}
         <div className="absolute left-[8%] top-[30%] pointer-events-none opacity-30 md:opacity-50">
           <div className="mini-cube">
             <div className="mini-face mini-front"></div>
@@ -550,7 +736,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Detail Stats / Feature Grid on light Slate canvas */}
+      {/* Detail Stats / Feature Grid */}
       <section className="max-w-[1280px] w-full mx-auto px-6 py-24 z-10 relative">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           

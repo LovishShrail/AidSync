@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useContract } from '../../hooks/useContract';
 import { useWallet } from '../../hooks/useWallet';
@@ -10,6 +10,8 @@ import DonationForm from '../donations/DonationForm';
 import RecentDonations from '../donations/RecentDonations';
 import LeaderboardTable from '../donations/LeaderboardTable';
 import { formatEther } from '../../utils/formatters';
+import { Maximize2, Minimize2 } from 'lucide-react';
+
 
 
 const DisasterDetail = () => {
@@ -22,6 +24,105 @@ const DisasterDetail = () => {
   const [loading, setLoading] = useState(true);
   const [organizations, setOrganizations] = useState([]);
   const [showDonationModal, setShowDonationModal] = useState(false);
+  const [showModelModal, setShowModelModal] = useState(false);
+
+  // Fullscreen container ref and handler
+  const modelContainerRef = useRef(null);
+  const inlineModelContainerRef = useRef(null);
+  const [isInlineFullscreen, setIsInlineFullscreen] = useState(false);
+  const [isModalFullscreen, setIsModalFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      modelContainerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  const toggleInlineFullscreen = () => {
+    if (!document.fullscreenElement) {
+      inlineModelContainerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsInlineFullscreen(document.fullscreenElement === inlineModelContainerRef.current);
+      setIsModalFullscreen(document.fullscreenElement === modelContainerRef.current);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+
+  // Self-healing multi-gateway state variables
+  const [gatewayIndex, setGatewayIndex] = useState(0);
+  const [videoHash, setVideoHash] = useState('');
+  const [modelHash, setModelHash] = useState('');
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (disaster) {
+      if (disaster.videoUrl) {
+        const vHash = disaster.videoUrl.includes('/') 
+          ? disaster.videoUrl.split('/').pop() 
+          : disaster.videoUrl;
+        setVideoHash(vHash);
+      }
+      if (disaster.modelUrl) {
+        const mHash = disaster.modelUrl.includes('/') 
+          ? disaster.modelUrl.split('/').pop() 
+          : disaster.modelUrl;
+        setModelHash(mHash);
+      }
+      setGatewayIndex(0); // Reset gateway to index 0 on data change
+    }
+  }, [disaster]);
+
+  const videoGateways = videoHash ? [
+    `https://gateway.pinata.cloud/ipfs/${videoHash}`,
+    `https://ipfs.io/ipfs/${videoHash}`,
+    `https://dweb.link/ipfs/${videoHash}`,
+    `https://nftstorage.link/ipfs/${videoHash}`
+  ] : [];
+
+  const currentVideoUrl = videoGateways[gatewayIndex] || '';
+
+  const handleVideoError = () => {
+    console.warn(`Video load failed on gateway: ${videoGateways[gatewayIndex]}. Trying next fallback...`);
+    if (gatewayIndex < videoGateways.length - 1) {
+      setGatewayIndex(prev => prev + 1);
+    }
+  };
+
+  useEffect(() => {
+    if (videoRef.current && currentVideoUrl) {
+      videoRef.current.load();
+    }
+  }, [currentVideoUrl]);
+
+  // Load Google <model-viewer> dynamically to support native 3D rendering in the browser
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js';
+    document.head.appendChild(script);
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
 
   
   useEffect(() => {
@@ -117,6 +218,22 @@ const DisasterDetail = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <style>{`
+        #fullscreen-viewer-container:fullscreen,
+        #inline-model-container:fullscreen {
+          width: 100% !important;
+          height: 100% !important;
+          background-color: #0f172a !important;
+          border-radius: 0px !important;
+          padding: 0 !important;
+        }
+        #fullscreen-viewer-container:fullscreen model-viewer,
+        #inline-model-container:fullscreen model-viewer {
+          width: 100% !important;
+          height: 100% !important;
+          min-height: 100% !important;
+        }
+      `}</style>
       <div className="max-w-4xl mx-auto">
         {/* Header section */}
         <div className="mb-8">
@@ -166,37 +283,32 @@ const DisasterDetail = () => {
                         <span>Drone Video Footage</span>
                       </h3>
                       <video 
+                        ref={videoRef}
                         controls 
                         className="w-full rounded-lg shadow-inner bg-black aspect-video object-contain"
                         preload="metadata"
+                        onError={handleVideoError}
                       >
                         <source 
-                          src={disaster.videoUrl.replace('cloudflare-ipfs.com', 'ipfs.io').replace('gateway.pinata.cloud', 'ipfs.io')} 
-                          type="video/mp4" 
-                        />
-                        <source 
-                          src={disaster.videoUrl.replace('cloudflare-ipfs.com', 'dweb.link').replace('gateway.pinata.cloud', 'dweb.link').replace('ipfs.io', 'dweb.link')} 
+                          src={currentVideoUrl} 
                           type="video/mp4" 
                         />
                         Your browser does not support the video tag.
                       </video>
+                      {gatewayIndex > 0 && (
+                        <p className="text-[10px] text-orange-500 mt-1 font-semibold">
+                          Warning: Default gateway failed. Switched to fallback gateway #{gatewayIndex}
+                        </p>
+                      )}
                     </div>
-                    <div className="mt-3 flex space-x-2">
+                    <div className="mt-3">
                       <a 
-                        href={disaster.videoUrl.replace('cloudflare-ipfs.com', 'ipfs.io').replace('gateway.pinata.cloud', 'ipfs.io')} 
+                        href={videoHash ? `https://gateway.pinata.cloud/ipfs/${videoHash}` : disaster.videoUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="flex-1 text-center border border-red-500 text-red-600 text-xs font-semibold py-2 rounded-lg hover:bg-red-50 transition-colors"
+                        className="block w-full text-center border border-blue-500 text-blue-600 text-xs font-semibold py-2 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
                       >
-                        Open Video (ipfs.io)
-                      </a>
-                      <a 
-                        href={disaster.videoUrl.replace('cloudflare-ipfs.com', 'dweb.link').replace('gateway.pinata.cloud', 'dweb.link').replace('ipfs.io', 'dweb.link')} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex-1 text-center border border-indigo-500 text-indigo-600 text-xs font-semibold py-2 rounded-lg hover:bg-indigo-50 transition-colors"
-                      >
-                        Open Video (dweb.link)
+                        Open Video (Pinata Gateway)
                       </a>
                     </div>
                   </div>
@@ -207,35 +319,50 @@ const DisasterDetail = () => {
                     <div>
                       <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center space-x-2">
                         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                        <span>3D Terrain Model</span>
+                        <span>Interactive 3D Terrain Model</span>
                       </h3>
-                      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-lg p-4 flex flex-col items-center justify-center text-center space-y-2 aspect-video">
-                        <svg className="w-8 h-8 text-indigo-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                        <div>
-                          <p className="text-xs font-semibold text-gray-800">Decentralized 3D Model Loaded</p>
-                          <p className="text-[10px] text-gray-400 mt-0.5 font-mono line-clamp-1 max-w-[180px]">{disaster.modelUrl.split('/').pop()}</p>
-                        </div>
+                      <div 
+                        ref={inlineModelContainerRef}
+                        id="inline-model-container"
+                        className="bg-slate-100 border border-slate-200 rounded-lg overflow-hidden aspect-video relative group"
+                      >
+                        {/* eslint-disable-next-line react/no-unknown-property */}
+                        <model-viewer
+                          src={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : disaster.modelUrl}
+                          camera-controls=""
+                          auto-rotate=""
+                          shadow-intensity="1"
+                          style={{ width: '100%', height: '100%', display: 'block', minHeight: '180px' }}
+                        ></model-viewer>
+                        <button
+                          onClick={toggleInlineFullscreen}
+                          className={`absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/80 text-white rounded-lg transition-all flex items-center justify-center shadow-md backdrop-blur-sm z-10 ${
+                            isInlineFullscreen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
+                          }`}
+                          title={isInlineFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                        >
+                          {isInlineFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                        </button>
                       </div>
+                      <p className="text-[10px] text-gray-400 mt-2 font-mono line-clamp-1">
+                        CID: {modelHash}
+                      </p>
                     </div>
                     <div className="mt-3 flex space-x-2">
                       <a 
-                        href={disaster.modelUrl} 
+                        href={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : disaster.modelUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="flex-1 text-center bg-indigo-600 text-white text-xs font-semibold py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                       >
                         Download Model
                       </a>
-                      <a 
-                        href={`https://gltf-viewer.donmccurdy.com/?url=${encodeURIComponent(disaster.modelUrl)}`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
+                      <button 
+                        onClick={() => setShowModelModal(true)}
                         className="flex-1 text-center border border-indigo-600 text-indigo-600 text-xs font-semibold py-2 rounded-lg hover:bg-indigo-50 transition-colors"
                       >
                         Open 3D Viewer
-                      </a>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -303,6 +430,40 @@ const DisasterDetail = () => {
             onSuccess={() => setShowDonationModal(false)}
           />
         )}
+      </Modal>
+
+      {/* Fullscreen 3D Model Modal */}
+      <Modal
+        isOpen={showModelModal}
+        onClose={() => setShowModelModal(false)}
+        title="3D Terrain Inspector"
+        maxWidth="max-w-5xl"
+      >
+        <div className="flex flex-col space-y-3">
+          <div 
+            ref={modelContainerRef}
+            id="fullscreen-viewer-container"
+            className="w-full h-[600px] bg-slate-100 rounded-lg overflow-hidden relative group"
+          >
+            {/* eslint-disable-next-line react/no-unknown-property */}
+            <model-viewer
+              src={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : disaster.modelUrl}
+              camera-controls=""
+              auto-rotate=""
+              shadow-intensity="1"
+              style={{ width: '100%', height: '100%', display: 'block' }}
+            ></model-viewer>
+            <button
+              onClick={toggleFullscreen}
+              className={`absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/80 text-white rounded-lg transition-all flex items-center justify-center shadow-md backdrop-blur-sm z-10 ${
+                isModalFullscreen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus:opacity-100'
+              }`}
+              title={isModalFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isModalFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
