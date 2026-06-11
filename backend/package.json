@@ -1,0 +1,21 @@
+{
+  "name": "aidsync-backend",
+  "version": "1.0.0",
+  "description": "Backend cache, SIWE Auth, and IPFS upload for AidSync3D",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.5",
+    "express": "^4.19.2",
+    "form-data": "^4.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.2.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.14"
+  }
+}
