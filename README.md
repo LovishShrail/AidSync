@@ -122,7 +122,7 @@ Create a `.env` file in the `backend/` directory:
 ```env
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/aidsync
-JWT_SECRET=aidsync_jwt_signing_secret_987654321
+JWT_SECRET=your_jwt_secret
 SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
 CONTRACT_ADDRESS=0xF0d2bdAB7F99400a62bE6d20D5F4A0963470dEbE
 PINATA_JWT=your_pinata_jwt_here
