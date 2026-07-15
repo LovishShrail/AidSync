@@ -18,7 +18,8 @@ const DisasterDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { contract } = useContract();
-  const { connected } = useWallet();
+  const { account, connect } = useWallet();
+
   
   const [disaster, setDisaster] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -413,11 +414,11 @@ const DisasterDetail = () => {
         onClose={() => setShowDonationModal(false)}
         title="Make a Donation"
       >
-        {!connected ? (
+        {!account ? (
           <div className="py-4 text-center">
             <p className="mb-4 text-gray-700">Please connect your wallet to make a donation.</p>
             <button 
-              onClick={() => {/* Connect wallet logic */}}
+              onClick={connect}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Connect Wallet
