@@ -41,28 +41,66 @@ const Home = () => {
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!contract || !account) {
-        setIsLoadingData(false);
-        return;
-      }
-
+    const fetchCachedData = async () => {
       try {
         setIsLoadingData(true);
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiBase}/api/disasters`);
+        if (res.ok) {
+          const dbData = await res.json();
+          const processed = dbData.map((d, index) => ({
+            id: index,
+            name: d.name || '',
+            type: d.type || '',
+            severity: d.severity || '',
+            description: d.description || '',
+            affectedAreas: d.affectedAreas || '',
+            affectedPeopleCount: Number(d.affectedPeopleCount || 0),
+            targetAmount: Number(d.targetAmount || 0),
+            collectedAmount: Number(d.collectedAmount || 0),
+            reliefOrganizations: d.reliefOrganizations || [],
+            topDonors: d.topDonors || { addresses: [], amounts: [] }
+          }));
 
-        // Verify contract is connected
-        if (!contract.runner) {
-          throw new Error("Contract not connected properly");
+          setDisasters(processed);
+          
+          const featured = [...processed]
+            .sort((a, b) => {
+              const severityOrder = { 'Critical': 3, 'High': 2, 'Medium': 1, 'Low': 0 };
+              const aSeverity = severityOrder[a.severity] || 0;
+              const bSeverity = severityOrder[b.severity] || 0;
+              if (aSeverity !== bSeverity) return bSeverity - aSeverity;
+              const aProgress = a.targetAmount > 0 ? a.collectedAmount / a.targetAmount : 0;
+              const bProgress = b.targetAmount > 0 ? b.collectedAmount / b.targetAmount : 0;
+              return bProgress - aProgress;
+            })
+            .slice(0, 3);
+          setFeaturedDisasters(featured);
         }
+      } catch (err) {
+        console.warn("Failed to load featured disasters from cache:", err);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
 
-        // Fetch data
+    fetchCachedData();
+  }, []);
+
+  useEffect(() => {
+    const fetchBlockchainData = async () => {
+      if (!contract) return;
+
+      try {
+        // Fetch emergency fund balance and on-chain disasters in parallel
         const [disastersData, emergencyFundBalance] = await Promise.all([
           contract.getAllDisasterData(),
           contract.getEmergencyReliefFund()
         ]);
 
-        // Process data
-        const processedDisasters = disastersData.map((disaster, index) => ({
+        setEmergencyFund(Number(ethers.formatEther(emergencyFundBalance)));
+
+        const processed = disastersData.map((disaster, index) => ({
           id: index,
           name: disaster.disasterName,
           type: disaster.disasterType,
@@ -76,35 +114,28 @@ const Home = () => {
           topDonors: disaster.topDonors
         }));
 
-        setDisasters(processedDisasters);
-        setEmergencyFund(Number(ethers.formatEther(emergencyFundBalance)));
+        setDisasters(processed);
 
-        // Get featured disasters
-        const featured = [...processedDisasters]
+        const featured = [...processed]
           .sort((a, b) => {
             const severityOrder = { 'Critical': 3, 'High': 2, 'Medium': 1, 'Low': 0 };
             const aSeverity = severityOrder[a.severity] || 0;
             const bSeverity = severityOrder[b.severity] || 0;
-            
             if (aSeverity !== bSeverity) return bSeverity - aSeverity;
-            
-            const aProgress = a.collectedAmount / a.targetAmount;
-            const bProgress = b.collectedAmount / b.targetAmount;
-            
+            const aProgress = a.targetAmount > 0 ? a.collectedAmount / a.targetAmount : 0;
+            const bProgress = b.targetAmount > 0 ? b.collectedAmount / b.targetAmount : 0;
             return bProgress - aProgress;
           })
           .slice(0, 3);
         
         setFeaturedDisasters(featured);
       } catch (err) {
-        console.error("Error fetching data:", err);
-      } finally {
-        setIsLoadingData(false);
+        console.error("Error reconciling blockchain data:", err);
       }
     };
-    
-    fetchData();
-  }, [contract, account]);
+
+    fetchBlockchainData();
+  }, [contract]);
 
   useEffect(() => {
     const fetchAnalytics = async () => {

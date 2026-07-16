@@ -1,4 +1,5 @@
 import { Disaster, Donation } from '../database.js';
+import { syncDisasterSingle } from '../services/blockchain.js';
 
 export const getDisasters = async (req, res) => {
   try {
@@ -83,5 +84,19 @@ export const getAnalytics = async (req, res) => {
   } catch (error) {
     console.error('Analytics aggregation error:', error);
     res.status(500).json({ error: 'Failed to aggregate analytics' });
+  }
+};
+
+export const syncSingle = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updated = await syncDisasterSingle(id);
+    if (updated) {
+      res.json({ success: true, disaster: updated });
+    } else {
+      res.status(500).json({ error: 'Failed to sync disaster' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

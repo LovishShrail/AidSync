@@ -127,56 +127,102 @@ const DisasterDetail = () => {
 
   
   useEffect(() => {
-    const fetchDisasterDetails = async () => {
+    const fetchCachedAndSyncDetail = async () => {
+      let cachedData = null;
+      
+      // 1. Fetch from database first for instant load
       try {
-        const disasterData = await contract.getDisaster(id);
-        
-        let videoUrl = '';
-        let modelUrl = '';
-        try {
-          const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-          const dbRes = await fetch(`${apiBase}/api/disasters/${id}`);
-          if (dbRes.ok) {
-            const dbData = await dbRes.json();
-            videoUrl = dbData.videoUrl || '';
-            modelUrl = dbData.modelUrl || '';
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const dbRes = await fetch(`${apiBase}/api/disasters/${id}`);
+        if (dbRes.ok) {
+          cachedData = await dbRes.json();
+          setDisaster({
+            disasterName: cachedData.name || '',
+            severity: cachedData.severity || '',
+            disasterType: cachedData.type || '',
+            description: cachedData.description || '',
+            affectedAreas: cachedData.affectedAreas || '',
+            affectedPeopleCount: BigInt(cachedData.affectedPeopleCount || 0),
+            targetCollectionAmount: ethers.parseEther((cachedData.targetAmount || 0).toString()),
+            totalCollectedAmount: ethers.parseEther((cachedData.collectedAmount || 0).toString()),
+            reliefOrganizations: cachedData.reliefOrganizations || [],
+            videoUrl: cachedData.videoUrl || '',
+            modelUrl: cachedData.modelUrl || ''
+          });
+          
+          // Set temp organizations list
+          if (cachedData.reliefOrganizations) {
+            setOrganizations(cachedData.reliefOrganizations.map(org => ({
+              address: org,
+              name: org.slice(0, 6) + '...' + org.slice(-4)
+            })));
           }
-        } catch (dbErr) {
-          console.warn("Could not fetch off-chain media:", dbErr);
+          
+          setLoading(false);
         }
+      } catch (dbErr) {
+        console.warn("Failed to fetch off-chain details from cache:", dbErr);
+      }
 
-        setDisaster({
-          disasterName: disasterData.disasterName,
-          severity: disasterData.severity,
-          disasterType: disasterData.disasterType,
-          description: disasterData.description,
-          affectedAreas: disasterData.affectedAreas,
-          affectedPeopleCount: disasterData.affectedPeopleCount,
-          targetCollectionAmount: disasterData.targetCollectionAmount,
-          totalCollectedAmount: disasterData.totalCollectedAmount,
-          reliefOrganizations: disasterData.reliefOrganizations,
-          videoUrl,
-          modelUrl
-        });
-        
-        const orgPromises = disasterData.reliefOrganizations.map(async (orgAddress) => {
-          const [name] = await contract.getOrganization(orgAddress);
-          return { address: orgAddress, name };
-        });
-        
-        const orgsWithNames = await Promise.all(orgPromises);
-        setOrganizations(orgsWithNames);
-        
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch disaster details:", error);
-        setLoading(false);
+      // 2. Fetch from blockchain in the background and reconcile
+      if (contract && id !== undefined) {
+        try {
+          const disasterData = await contract.getDisaster(id);
+          
+          setDisaster(prev => {
+            if (prev) {
+              const collectedMismatch = disasterData.totalCollectedAmount !== prev.totalCollectedAmount;
+              const targetMismatch = disasterData.targetCollectionAmount !== prev.targetCollectionAmount;
+              
+              if (collectedMismatch || targetMismatch) {
+                // Silently repair the database cache on discrepancy
+                const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                fetch(`${apiBase}/api/disasters/${id}/sync`, { method: 'POST' })
+                  .then(r => {
+                    if (r.ok) console.log(`Database cache self-healed for disaster #${id}`);
+                  })
+                  .catch(syncErr => console.warn(`Failed silent cache repair for disaster #${id}:`, syncErr));
+              }
+            }
+
+            const blockchainDisaster = {
+              disasterName: disasterData.disasterName,
+              severity: disasterData.severity,
+              disasterType: disasterData.disasterType,
+              description: disasterData.description,
+              affectedAreas: disasterData.affectedAreas,
+              affectedPeopleCount: disasterData.affectedPeopleCount,
+              targetCollectionAmount: disasterData.targetCollectionAmount,
+              totalCollectedAmount: disasterData.totalCollectedAmount,
+              reliefOrganizations: disasterData.reliefOrganizations,
+              videoUrl: prev?.videoUrl || '',
+              modelUrl: prev?.modelUrl || ''
+            };
+            return blockchainDisaster;
+          });
+
+          // Fetch verified organization names
+          const orgPromises = disasterData.reliefOrganizations.map(async (orgAddress) => {
+            try {
+              const [name] = await contract.getOrganization(orgAddress);
+              return { address: orgAddress, name };
+            } catch (err) {
+              console.error(`Failed to fetch name for org ${orgAddress}:`, err);
+              return { address: orgAddress, name: orgAddress.slice(0, 6) + '...' + orgAddress.slice(-4) };
+            }
+          });
+          
+          const orgsWithNames = await Promise.all(orgPromises);
+          setOrganizations(orgsWithNames);
+          setLoading(false);
+        } catch (error) {
+          console.error("Failed to sync disaster details from blockchain:", error);
+          setLoading(false);
+        }
       }
     };
     
-    if (contract && id !== undefined) {
-      fetchDisasterDetails();
-    }
+    fetchCachedAndSyncDetail();
   }, [contract, id]);
   
   if (loading) {

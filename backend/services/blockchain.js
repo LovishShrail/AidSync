@@ -106,3 +106,38 @@ const listenToEvents = () => {
     console.error('Failed to check or register event listeners:', err);
   }
 };
+
+export const syncDisasterSingle = async (disasterId) => {
+  if (!contract) return null;
+  try {
+    const disId = Number(disasterId);
+    const disaster = await contract.getDisaster(disId);
+    const targetEth = Number(ethers.formatEther(disaster.targetCollectionAmount));
+    const collectedEth = Number(ethers.formatEther(disaster.totalCollectedAmount));
+
+    const updated = await Disaster.findOneAndUpdate(
+      { disasterId: disId },
+      {
+        name: disaster.disasterName,
+        type: disaster.disasterType,
+        severity: disaster.severity,
+        description: disaster.description,
+        affectedAreas: disaster.affectedAreas,
+        affectedPeopleCount: Number(disaster.affectedPeopleCount),
+        targetAmount: targetEth,
+        collectedAmount: collectedEth,
+        reliefOrganizations: disaster.reliefOrganizations,
+        topDonors: {
+          addresses: disaster.topDonors.addresses,
+          amounts: disaster.topDonors.amounts.map(amt => Number(ethers.formatEther(amt)))
+        }
+      },
+      { upsert: true, new: true }
+    );
+    console.log(`Self-healed/Synced single disaster #${disId} successfully.`);
+    return updated;
+  } catch (error) {
+    console.error(`Error syncing single disaster #${disasterId}:`, error);
+    return null;
+  }
+};

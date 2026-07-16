@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 import DisasterCard from './DisasterCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useContract } from '../../hooks/useContract';
@@ -11,21 +12,78 @@ const DisasterList = () => {
   const [sort, setSort] = useState('newest');
   const { contract } = useContract();
 
+  const mapDbToOnchain = (dbDisasters) => {
+    return dbDisasters.map(d => ({
+      disasterName: d.name || '',
+      disasterType: d.type || '',
+      severity: d.severity || '',
+      description: d.description || '',
+      affectedAreas: d.affectedAreas || '',
+      affectedPeopleCount: BigInt(d.affectedPeopleCount || 0),
+      targetCollectionAmount: ethers.parseEther((d.targetAmount || 0).toString()),
+      totalCollectedAmount: ethers.parseEther((d.collectedAmount || 0).toString()),
+      reliefOrganizations: d.reliefOrganizations || [],
+      topDonors: d.topDonors || { addresses: [], amounts: [] }
+    }));
+  };
+
   useEffect(() => {
-    const fetchDisasters = async () => {
+    const fetchCachedAndSync = async () => {
+      // 1. Fetch from database first for instant load
       try {
-        const disastersData = await contract.getAllDisasterData();
-        setDisasters(disastersData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch disasters:", error);
-        setLoading(false);
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiBase}/api/disasters`);
+        if (res.ok) {
+          const dbData = await res.json();
+          const mapped = mapDbToOnchain(dbData);
+          setDisasters(mapped);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch disasters from cache:", err);
+      }
+
+      // 2. Fetch from blockchain in the background and reconcile
+      if (contract) {
+        try {
+          const disastersData = await contract.getAllDisasterData();
+          setDisasters(prevDisasters => {
+            const reconciled = disastersData.map((onChainDisaster, index) => {
+              const cached = prevDisasters[index];
+              if (!cached) return onChainDisaster;
+              
+              const collectedMismatch = onChainDisaster.totalCollectedAmount !== cached.totalCollectedAmount;
+              const targetMismatch = onChainDisaster.targetCollectionAmount !== cached.targetCollectionAmount;
+              
+              if (collectedMismatch || targetMismatch) {
+                // Silently repair the database cache on discrepancy
+                const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                fetch(`${apiBase}/api/disasters/${index}/sync`, { method: 'POST' })
+                  .then(r => {
+                    if (r.ok) console.log(`Database cache self-healed for disaster #${index}`);
+                  })
+                  .catch(syncErr => console.warn(`Failed silent cache repair for disaster #${index}:`, syncErr));
+
+                // Silently reconcile using verified blockchain truth
+                return {
+                  ...cached,
+                  totalCollectedAmount: onChainDisaster.totalCollectedAmount,
+                  targetCollectionAmount: onChainDisaster.targetCollectionAmount
+                };
+              }
+              return cached;
+            });
+            return reconciled;
+          });
+          setLoading(false);
+        } catch (error) {
+          console.error("Failed to sync disasters from blockchain:", error);
+          setLoading(false);
+        }
       }
     };
 
-    if (contract) {
-      fetchDisasters();
-    }
+    fetchCachedAndSync();
   }, [contract]);
 
   const filterDisasters = (disasters) => {
