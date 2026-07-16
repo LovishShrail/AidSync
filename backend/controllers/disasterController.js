@@ -25,6 +25,10 @@ export const updateDisasterMedia = async (req, res) => {
   const { videoUrl, modelUrl } = req.body;
 
   try {
+    // Sync verified on-chain details from blockchain first so MongoDB has a complete record
+    await syncDisasterSingle(id);
+
+    // Save the media URLs to the same document
     const updated = await Disaster.findOneAndUpdate(
       { disasterId: Number(id) },
       { videoUrl, modelUrl },
