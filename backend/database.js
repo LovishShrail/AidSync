@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import dns from 'dns';
+
+// Force Node.js runtime to use Google and Cloudflare DNS resolvers
+// This bypasses ISP DNS hijacking or blocking of _mongodb._tcp SRV records.
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 dotenv.config();
 
