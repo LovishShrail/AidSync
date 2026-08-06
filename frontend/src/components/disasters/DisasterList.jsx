@@ -14,6 +14,7 @@ const DisasterList = () => {
 
   const mapDbToOnchain = (dbDisasters) => {
     return dbDisasters.map(d => ({
+      disasterId: d.disasterId,
       disasterName: d.name || '',
       disasterType: d.type || '',
       severity: d.severity || '',
@@ -49,8 +50,23 @@ const DisasterList = () => {
           const disastersData = await contract.getAllDisasterData();
           setDisasters(prevDisasters => {
             const reconciled = disastersData.map((onChainDisaster, index) => {
-              const cached = prevDisasters[index];
-              if (!cached) return onChainDisaster;
+              const cached = prevDisasters.find(p => p.disasterId === index);
+              
+              const targetDisaster = {
+                disasterId: index,
+                disasterName: onChainDisaster.disasterName,
+                disasterType: onChainDisaster.disasterType,
+                severity: onChainDisaster.severity,
+                description: onChainDisaster.description,
+                affectedAreas: onChainDisaster.affectedAreas,
+                affectedPeopleCount: onChainDisaster.affectedPeopleCount,
+                targetCollectionAmount: onChainDisaster.targetCollectionAmount,
+                totalCollectedAmount: onChainDisaster.totalCollectedAmount,
+                reliefOrganizations: onChainDisaster.reliefOrganizations,
+                topDonors: onChainDisaster.topDonors
+              };
+
+              if (!cached) return targetDisaster;
               
               const collectedMismatch = onChainDisaster.totalCollectedAmount !== cached.totalCollectedAmount;
               const targetMismatch = onChainDisaster.targetCollectionAmount !== cached.targetCollectionAmount;
@@ -183,8 +199,8 @@ const DisasterList = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayedDisasters.map((disaster, index) => (
-            <DisasterCard key={index} disaster={disaster} index={index} />
+          {displayedDisasters.map((disaster) => (
+            <DisasterCard key={disaster.disasterId} disaster={disaster} />
           ))}
         </div>
       )}

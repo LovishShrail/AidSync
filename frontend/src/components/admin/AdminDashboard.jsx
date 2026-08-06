@@ -39,7 +39,8 @@ const AdminDashboard = () => {
 
 
         // Process disasters
-        const processedDisasters = allDisasters.map(disaster => ({
+        const processedDisasters = allDisasters.map((disaster, index) => ({
+          disasterId: index,
           disasterName: disaster[0] || 'Unknown',
           severity: disaster[1] || 'Unknown',
           disasterType: disaster[2] || 'Unknown',
@@ -193,7 +194,7 @@ const AdminDashboard = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <AdminControls disasterId={index} />
+                    <AdminControls disasterId={disaster.disasterId} />
                   </td>
                 </tr>
               ))}

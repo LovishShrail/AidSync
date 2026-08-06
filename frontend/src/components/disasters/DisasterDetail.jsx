@@ -70,25 +70,26 @@ const DisasterDetail = () => {
   const [gatewayIndex, setGatewayIndex] = useState(0);
   const [videoHash, setVideoHash] = useState('');
   const [modelHash, setModelHash] = useState('');
+  const [media, setMedia] = useState({ videoUrl: '', modelUrl: '' });
   const videoRef = useRef(null);
 
   useEffect(() => {
-    if (disaster) {
-      if (disaster.videoUrl) {
-        const vHash = disaster.videoUrl.includes('/') 
-          ? disaster.videoUrl.split('/').pop() 
-          : disaster.videoUrl;
+    if (media) {
+      if (media.videoUrl) {
+        const vHash = media.videoUrl.includes('/') 
+          ? media.videoUrl.split('/').pop() 
+          : media.videoUrl;
         setVideoHash(vHash);
       }
-      if (disaster.modelUrl) {
-        const mHash = disaster.modelUrl.includes('/') 
-          ? disaster.modelUrl.split('/').pop() 
-          : disaster.modelUrl;
+      if (media.modelUrl) {
+        const mHash = media.modelUrl.includes('/') 
+          ? media.modelUrl.split('/').pop() 
+          : media.modelUrl;
         setModelHash(mHash);
       }
       setGatewayIndex(0); // Reset gateway to index 0 on data change
     }
-  }, [disaster]);
+  }, [media]);
 
   const videoGateways = videoHash ? [
     `https://gateway.pinata.cloud/ipfs/${videoHash}`,
@@ -125,7 +126,6 @@ const DisasterDetail = () => {
     };
   }, []);
 
-  
   useEffect(() => {
     const fetchCachedAndSyncDetail = async () => {
       let cachedData = null;
@@ -136,6 +136,11 @@ const DisasterDetail = () => {
         const dbRes = await fetch(`${apiBase}/api/disasters/${id}`);
         if (dbRes.ok) {
           cachedData = await dbRes.json();
+          setMedia({
+            videoUrl: cachedData.videoUrl || '',
+            modelUrl: cachedData.modelUrl || ''
+          });
+
           setDisaster({
             disasterName: cachedData.name || '',
             severity: cachedData.severity || '',
@@ -145,9 +150,7 @@ const DisasterDetail = () => {
             affectedPeopleCount: BigInt(cachedData.affectedPeopleCount || 0),
             targetCollectionAmount: ethers.parseEther((cachedData.targetAmount || 0).toString()),
             totalCollectedAmount: ethers.parseEther((cachedData.collectedAmount || 0).toString()),
-            reliefOrganizations: cachedData.reliefOrganizations || [],
-            videoUrl: cachedData.videoUrl || '',
-            modelUrl: cachedData.modelUrl || ''
+            reliefOrganizations: cachedData.reliefOrganizations || []
           });
           
           // Set temp organizations list
@@ -194,9 +197,7 @@ const DisasterDetail = () => {
               affectedPeopleCount: disasterData.affectedPeopleCount,
               targetCollectionAmount: disasterData.targetCollectionAmount,
               totalCollectedAmount: disasterData.totalCollectedAmount,
-              reliefOrganizations: disasterData.reliefOrganizations,
-              videoUrl: prev?.videoUrl || '',
-              modelUrl: prev?.modelUrl || ''
+              reliefOrganizations: disasterData.reliefOrganizations
             };
             return blockchainDisaster;
           });
@@ -320,9 +321,9 @@ const DisasterDetail = () => {
               </div>
             </div>
 
-            {(disaster.videoUrl || disaster.modelUrl) && (
+            {(media.videoUrl || media.modelUrl) && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {disaster.videoUrl && (
+                {media.videoUrl && (
                   <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm p-4 flex flex-col justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center space-x-2">
@@ -331,15 +332,12 @@ const DisasterDetail = () => {
                       </h3>
                       <video 
                         ref={videoRef}
+                        src={currentVideoUrl}
                         controls 
                         className="w-full rounded-lg shadow-inner bg-black aspect-video object-contain"
                         preload="metadata"
                         onError={handleVideoError}
                       >
-                        <source 
-                          src={currentVideoUrl} 
-                          type="video/mp4" 
-                        />
                         Your browser does not support the video tag.
                       </video>
                       {gatewayIndex > 0 && (
@@ -350,7 +348,7 @@ const DisasterDetail = () => {
                     </div>
                     <div className="mt-3">
                       <a 
-                        href={videoHash ? `https://gateway.pinata.cloud/ipfs/${videoHash}` : disaster.videoUrl} 
+                        href={videoHash ? `https://gateway.pinata.cloud/ipfs/${videoHash}` : media.videoUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="block w-full text-center border border-blue-500 text-blue-600 text-xs font-semibold py-2 rounded-lg hover:bg-blue-50 transition-colors whitespace-nowrap"
@@ -361,7 +359,7 @@ const DisasterDetail = () => {
                   </div>
                 )}
 
-                {disaster.modelUrl && (
+                {media.modelUrl && (
                   <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm p-4 flex flex-col justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center space-x-2">
@@ -375,7 +373,7 @@ const DisasterDetail = () => {
                       >
                         {/* eslint-disable-next-line react/no-unknown-property */}
                         <model-viewer
-                          src={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : disaster.modelUrl}
+                          src={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : media.modelUrl}
                           camera-controls=""
                           auto-rotate=""
                           shadow-intensity="1"
@@ -397,7 +395,7 @@ const DisasterDetail = () => {
                     </div>
                     <div className="mt-3 flex space-x-2">
                       <a 
-                        href={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : disaster.modelUrl} 
+                        href={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : media.modelUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="flex-1 text-center bg-indigo-600 text-white text-xs font-semibold py-2 rounded-lg hover:bg-indigo-700 transition-colors"
@@ -415,6 +413,7 @@ const DisasterDetail = () => {
                 )}
               </div>
             )}
+
             
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Donation Progress</h3>
@@ -492,9 +491,8 @@ const DisasterDetail = () => {
             id="fullscreen-viewer-container"
             className="w-full h-[600px] bg-slate-100 rounded-lg overflow-hidden relative group"
           >
-            {/* eslint-disable-next-line react/no-unknown-property */}
             <model-viewer
-              src={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : disaster.modelUrl}
+              src={modelHash ? `https://gateway.pinata.cloud/ipfs/${modelHash}` : media.modelUrl}
               camera-controls=""
               auto-rotate=""
               shadow-intensity="1"

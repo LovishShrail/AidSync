@@ -48,8 +48,8 @@ const Home = () => {
         const res = await fetch(`${apiBase}/api/disasters`);
         if (res.ok) {
           const dbData = await res.json();
-          const processed = dbData.map((d, index) => ({
-            id: index,
+          const processed = dbData.map((d) => ({
+            id: d.disasterId,
             name: d.name || '',
             type: d.type || '',
             severity: d.severity || '',

@@ -5,7 +5,7 @@ import ProgressBar from '../common/ProgressBar';
 import { ethers } from 'ethers';
 
 
-const DisasterCard = ({ disaster, index }) => {
+const DisasterCard = ({ disaster }) => {
   const navigate = useNavigate();
   
   // Convert BigNumber values to readable numbers
@@ -54,14 +54,14 @@ const DisasterCard = ({ disaster, index }) => {
     if (e.target.closest('.donate-button')) {
       return;
     }
-    navigate(`/disasters/${index}`);
+    navigate(`/disasters/${disaster.disasterId}`);
   };
 
   // Handle donate button click (navigate to donation form)
   const handleDonateClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    navigate(`/disasters/${index}`);
+    navigate(`/disasters/${disaster.disasterId}`);
   };
 
   return (
