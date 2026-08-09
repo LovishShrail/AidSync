@@ -30,19 +30,14 @@ const AdminControls = ({ disasterId }) => {
     navigate(`/disasters/${disasterId}/add-organization`);
   };
 
-  const uploadToIPFS = async (file, token) => {
+  const uploadToIPFS = async (file) => {
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const bodyFormData = new FormData();
     bodyFormData.append('file', file);
 
-    const headers = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const response = await fetch(`${apiBase}/api/upload`, {
       method: 'POST',
-      headers,
+      credentials: 'include',
       body: bodyFormData
     });
 
@@ -68,7 +63,7 @@ const AdminControls = ({ disasterId }) => {
       let currentToken = authToken;
       if (!currentToken) {
         setUploadProgress("Authenticating wallet with signature...");
-        currentToken = await loginWithSignature();
+        await loginWithSignature();
       }
 
       let videoUrl = '';
@@ -76,12 +71,12 @@ const AdminControls = ({ disasterId }) => {
 
       if (videoFile) {
         setUploadProgress(`Uploading drone video "${videoFile.name}" to IPFS...`);
-        videoUrl = await uploadToIPFS(videoFile, currentToken);
+        videoUrl = await uploadToIPFS(videoFile);
       }
 
       if (modelFile) {
         setUploadProgress(`Uploading 3D model "${modelFile.name}" to IPFS...`);
-        modelUrl = await uploadToIPFS(modelFile, currentToken);
+        modelUrl = await uploadToIPFS(modelFile);
       }
 
       setUploadProgress("Syncing media URLs to database cache...");
@@ -94,9 +89,9 @@ const AdminControls = ({ disasterId }) => {
       const res = await fetch(`${apiBase}/api/disasters/${disasterId}/media`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentToken}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
 

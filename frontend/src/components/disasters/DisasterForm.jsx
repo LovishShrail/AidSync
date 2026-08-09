@@ -105,14 +105,9 @@ const DisasterForm = () => {
     const bodyFormData = new FormData();
     bodyFormData.append('file', file);
 
-    const headers = {};
-    if (authToken) {
-      headers['Authorization'] = `Bearer ${authToken}`;
-    }
-
     const response = await fetch(`${apiBase}/api/upload`, {
       method: 'POST',
-      headers,
+      credentials: 'include',
       body: bodyFormData
     });
 
@@ -176,14 +171,11 @@ const DisasterForm = () => {
           const newDisasterId = disastersData.length - 1;
 
           const headers = { 'Content-Type': 'application/json' };
-          const storedToken = localStorage.getItem('authToken');
-          if (storedToken) {
-            headers['Authorization'] = `Bearer ${storedToken}`;
-          }
 
           const response = await fetch(`${apiBase}/api/disasters/${newDisasterId}/media`, {
             method: 'PUT',
             headers,
+            credentials: 'include',
             body: JSON.stringify({ videoUrl, modelUrl })
           });
 

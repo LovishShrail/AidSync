@@ -8,7 +8,7 @@ import { formatAddress } from '../../utils/formatters';
 import { User, Award, History, Settings } from 'lucide-react';
 
 const UserProfile = () => {
-  const { account, connectWallet, balance, contract } = useContext(Web3Context);
+  const { account, connectWallet, balance, contract, isLoading: isWeb3Loading } = useContext(Web3Context);
   // console.log('Web3Context values:', {
   //   account,
   //   balance,
@@ -63,9 +63,17 @@ const UserProfile = () => {
         </p>
         <button
           onClick={connectWallet}
-          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          disabled={isWeb3Loading}
+          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:bg-blue-400 mx-auto"
         >
-          Connect Wallet
+          {isWeb3Loading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Connecting...</span>
+            </>
+          ) : (
+            'Connect Wallet'
+          )}
         </button>
       </div>
     );

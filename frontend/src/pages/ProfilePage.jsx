@@ -28,9 +28,16 @@ const ProfilePage = () => {
                     <button
                         onClick={connectWallet}
                         disabled={isWeb3Loading}
-                        className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+                        className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-400 flex items-center justify-center space-x-2 mx-auto min-w-[150px]"
                     >
-                        {isWeb3Loading ? 'Connecting...' : 'Connect Wallet'}
+                        {isWeb3Loading ? (
+                            <>
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                <span>Connecting...</span>
+                            </>
+                        ) : (
+                            'Connect Wallet'
+                        )}
                     </button>
                     {error && (
                         <div className="mt-4">

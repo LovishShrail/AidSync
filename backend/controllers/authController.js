@@ -44,9 +44,26 @@ export const verifySignature = async (req, res) => {
 
     // Generate JWT Token
     const token = jwt.sign({ address: address.toLowerCase() }, JWT_SECRET, { expiresIn: '24h' });
-    res.json({ token, success: true });
+    
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
+    res.json({ success: true });
   } catch (error) {
     console.error('Auth verification error:', error);
     res.status(500).json({ error: 'Failed to verify signature' });
   }
+};
+
+export const logout = async (req, res) => {
+  res.clearCookie('authToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  });
+  res.json({ success: true });
 };

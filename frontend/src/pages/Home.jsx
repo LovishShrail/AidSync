@@ -211,9 +211,17 @@ const Home = () => {
         <div className="flex flex-col space-y-2">
           <button 
             onClick={connectWallet}
-            className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+            disabled={isLoading}
+            className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors flex items-center justify-center space-x-2 disabled:bg-red-400"
           >
-            Connect Wallet
+            {isLoading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>Connecting...</span>
+              </>
+            ) : (
+              'Connect Wallet'
+            )}
           </button>
           {networkId !== 11155111 && (
             <button 
@@ -249,9 +257,17 @@ const Home = () => {
             {!account && (
               <button 
                 onClick={connectWallet} 
-                className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-full hover:bg-white hover:text-blue-700 transition-colors"
+                disabled={isLoading}
+                className="bg-transparent border-2 border-white text-white font-semibold py-3 px-8 rounded-full hover:bg-white hover:text-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 min-w-[180px]"
               >
-                Connect Wallet
+                {isLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  'Connect Wallet'
+                )}
               </button>
             )}
           </div>

@@ -4,7 +4,7 @@ import { Web3Context } from '../../context/Web3Context';
 import { Menu, X, ChevronDown } from 'lucide-react';
 
 const Navbar = () => {
-  const { account, isOwner, connectWallet } = useContext(Web3Context);
+  const { account, isOwner, connectWallet, isLoading } = useContext(Web3Context);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -88,9 +88,17 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={connectWallet}
-                className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors"
+                disabled={isLoading}
+                className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:bg-blue-400 min-w-[150px]"
               >
-                Connect Wallet
+                {isLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  'Connect Wallet'
+                )}
               </button>
             )}
           </div>
@@ -199,9 +207,17 @@ const Navbar = () => {
                   connectWallet();
                   setIsMenuOpen(false);
                 }}
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                disabled={isLoading}
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:bg-blue-400 w-full"
               >
-                Connect Wallet
+                {isLoading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  'Connect Wallet'
+                )}
               </button>
             )}
           </div>

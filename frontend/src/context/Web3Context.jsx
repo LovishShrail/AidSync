@@ -17,7 +17,7 @@ export const Web3Provider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [networkId, setNetworkId] = useState(null);
-  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
+  const [authToken, setAuthToken] = useState(localStorage.getItem('isLoggedIn'));
 
   const switchToSepolia = async () => {
     try {
@@ -98,6 +98,7 @@ export const Web3Provider = ({ children }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           address: account,
           signature,
@@ -110,10 +111,9 @@ export const Web3Provider = ({ children }) => {
         throw new Error(verifyErrorObj.error || "Signature verification failed");
       }
 
-      const { token } = await verifyRes.json();
-      localStorage.setItem('authToken', token);
-      setAuthToken(token);
-      return token;
+      localStorage.setItem('isLoggedIn', 'true');
+      setAuthToken('true');
+      return 'true';
     } catch (err) {
       console.error("Authentication failed:", err);
       setError(err.message || "Failed to sign in");
@@ -122,8 +122,10 @@ export const Web3Provider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('isLoggedIn');
     setAuthToken(null);
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    fetch(`${apiBase}/api/auth/logout`, { method: 'POST', credentials: 'include' });
   };
 
   const connectWallet = async () => {
